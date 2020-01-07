@@ -304,3 +304,111 @@ typedef struct GNode{
 		但包含两个指针域的链表并不一定是多重链表，比如在双向链表不是多重链表。
 多重链表有广泛的用途：基本上如树、图这样相对复杂的数据结构都可以采用多重链表方式实现存储。  
 
+<img src="mooc笔记.assets/image-20200107160802668.png" alt="image-20200107160802668" style="zoom:50%;" />
+
+<img src="mooc笔记.assets/image-20200107161122631.png" alt="image-20200107161122631" style="zoom:50%;" />![image-20200107161727907](mooc笔记.assets/image-20200107161727907.png)
+
+<img src="mooc笔记.assets/image-20200107161122631.png" alt="image-20200107161122631" style="zoom:50%;" />![image-20200107161727907](mooc笔记.assets/image-20200107161727907.png)
+
+### 2.2 堆栈(Stack):具有一定操作约束的线性表
+
+中缀表达式： 运算符号位于两个运算数之间。 如 ， a+b*c-d/e
+
+后缀表达式： 运算符号位于两个运算数之后。如， a b c * +d e /  -
+
+后缀表达式求值策略：从左向右“扫描”，逐个处理运算数和运算符号
+
+​				遇到运算数怎么办？如何“记住”目前还不未参与运算的数？
+
+​				遇到运算符号怎么办？对应的运算数是什么？
+启示： 需要有种存储方法，能顺序存储运算数，并在需要时“倒序”输出
+
+只在一端（栈顶， Top）做 插入、删除  
+
+插入数据： 入栈（Push）, 删除数据： 出栈（Pop）, 后入先出： Last In First Out（LIFO）
+
+
+<img src="mooc笔记.assets/image-20200107163045571.png" alt="image-20200107163045571" style="zoom:50%;" />
+
+#### 栈的顺序存储实现
+
+​	由一个一维数组和一个记录栈顶元素位置的变量组成
+
+```c
+#define MaxSize <储存数据元素的最大个数>
+typedef struct {
+        ElementType Data[MaxSize];
+        int Top;
+} Stack;
+```
+
+###### 1.入栈
+
+```c
+void Push( Stack *PtrS, ElementType item )
+{
+	if ( PtrS->Top == MaxSize-1 ) {
+		printf(“堆栈满”); return;
+	}else {
+        PtrS->Data[++(PtrS->Top)] = item;
+        return;
+    }
+}
+```
+
+###### 2.出栈
+
+```c
+ElementType Pop( Stack *PtrS )
+{
+    if ( PtrS->Top == -1 ) {
+        printf(“堆栈空”);
+        return ERROR; 			/* ERROR是ElementType的特殊值，标志错误*/
+    } else
+    	return ( PtrS->Data[(PtrS->Top)--] );
+}
+```
+
+pl.用一个数组实现两个堆栈,要求最大地利用数组空间,使数组只要有空间入栈操作就可以成功
+
+​		一种比较聪明的方法是使这两个栈分别从数组的两头开始向中间生长；当两个栈的栈顶指针相遇时，表示两个栈都满了。  
+
+```c
+#define MaxSize <存储数据元素的最大个数>
+struct DStack {
+    ElementType Data[MaxSize];
+    int Top1; /* 堆栈１的栈顶指针 */
+    int Top2; /* 堆栈２的栈顶指针 */
+} S;
+S.Top1 = -1;
+S.Top2 = MaxSize;
+```
+
+```c
+void Push( struct DStack *PtrS, ElementType item, int Tag )
+{ 				/* Tag作为区分两个堆栈的标志，取值为1和2 */
+    if ( PtrS->Top2 – PtrS->Top1 == 1) {	/*堆栈满*/
+   		printf(“堆栈满”); return ;
+    }
+    if ( Tag == 1 ) 						/* 对第一个堆栈操作 */
+    	PtrS->Data[++(PtrS->Top1)] = item;
+    else 									/* 对第二个堆栈操作 */
+    	PtrS->Data[--(PtrS->Top2)] = item;
+}
+```
+
+```c
+ElementType Pop( struct DStack *PtrS, int Tag )
+{ 							  /* Tag作为区分两个堆栈的标志，取值为1和2 */
+    if ( Tag == 1 ) { 							/* 对第一个堆栈操作 */
+        if ( PtrS->Top1 == -1 ) { 				/*堆栈1空 */
+       		printf(“堆栈1空”); return NULL;
+    	} else return PtrS->Data[(PtrS->Top1)--];
+    } else { 									/* 对第二个堆栈操作 */
+    	if ( PtrS->Top2 == MaxSize ) { 			/*堆栈2空 */
+    		printf(“堆栈2空”); return NULL;
+    	} else return PtrS->Data[(PtrS->Top2)++];
+    }
+}
+```
+
